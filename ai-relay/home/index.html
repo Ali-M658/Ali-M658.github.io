@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Relay – carry context between AI chats</title>
+<meta name="description" content="A Chrome extension that summarizes the AI chats you pick and carries the result into another chat. You review everything, and nothing is sent without you.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<style>
+  :root {
+    --ink: #171433;
+    --ink-2: #4f4c66;
+    --paper: #f6f5fb;
+    --card: #ffffff;
+    --line: #e1dff0;
+    --blue: #3b6cf5;
+    --violet: #6b3fe0;
+    --amber: #ffb020;
+    --amber-bg: #fff4dc;
+    --amber-ink: #6b4500;
+    --relay: linear-gradient(118deg, #3b6cf5 0%, #5a4fe8 55%, #6b3fe0 100%);
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #eeedf8;
+      --ink-2: #aeabc6;
+      --paper: #131126;
+      --card: #1d1a36;
+      --line: #322e55;
+      --amber-bg: #3a2c0c;
+      --amber-ink: #ffd88a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 18px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 6px; }
+  .wrap { max-width: 1120px; margin-left: auto; margin-right: auto; padding-left: 24px; padding-right: 24px; }
+
+  /* ---- hero: the one bold moment ---- */
+  .hero { background: var(--relay); color: #fff; overflow: hidden; }
+  .hero .grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; padding-top: 40px; padding-bottom: 88px; }
+  .top { display: flex; align-items: center; gap: 12px; padding: 22px 0 40px; font-weight: 700; font-size: 20px; }
+  .top img { width: 40px; height: 40px; border-radius: 10px; box-shadow: 0 0 0 1.5px rgba(255,255,255,.4); }
+  .top nav { margin-left: auto; font-weight: 500; font-size: 16px; }
+  .top nav a { text-decoration: none; opacity: .9; }
+  .top nav a:hover { opacity: 1; text-decoration: underline; }
+  h1 { font-size: clamp(40px, 5.6vw, 64px); line-height: 1.04; letter-spacing: -.03em; margin: 0; font-weight: 800; }
+  .lede { font-size: 21px; line-height: 1.5; max-width: 30em; margin: 22px 0 32px; color: rgba(255,255,255,.88); }
+  .store { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: #171433; border-radius: 999px; padding: 12px 22px; font-weight: 650; font-size: 17px; }
+  .store small { font-weight: 500; color: #5b5875; }
+  .hero-note { margin-top: 14px; font-size: 15px; color: rgba(255,255,255,.75); }
+
+  /* the relay stage: a summary leaves one chat and lands in the other's input box */
+  .stage { position: relative; height: 380px; --land-x: calc(100% - 248px); --land-y: calc(100% - 112px); }
+  .chat { position: absolute; width: 270px; background: #fff; color: #222; border-radius: 16px; padding: 16px 16px 14px; box-shadow: 0 24px 50px rgba(20,12,80,.35); font-size: 14px; line-height: 1.45; }
+  .chat .name { font-weight: 700; font-size: 13px; color: #6a6884; margin-bottom: 10px; }
+  .chat .msg { background: #f1f0f7; border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+  .chat .msg.me { background: #e8eefe; margin-left: 34px; }
+  .chat .box { margin-top: 10px; border: 1.5px solid #d9d7e8; border-radius: 10px; height: 92px; padding: 8px 10px; color: #9a98ad; font-size: 13px; position: relative; overflow: hidden; }
+  .chat.a { left: 0; top: 0; }
+  .chat.b { right: 0; bottom: 0; }
+  .baton { position: absolute; left: 40px; top: 150px; width: 226px; background: #171433; color: #fff; border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.4; box-shadow: 0 16px 34px rgba(10,6,40,.45); }
+  .baton b { display: block; font-size: 12px; color: #b9c8ff; margin-bottom: 3px; font-weight: 650; }
+  @media (prefers-reduced-motion: no-preference) {
+    .baton { animation: pass 2.6s cubic-bezier(.6,0,.25,1) .6s both; }
+    @keyframes pass {
+      0%   { left: 40px; top: 150px; transform: scale(1); }
+      55%  { transform: scale(1.04); }
+      100% { left: var(--land-x); top: var(--land-y); transform: scale(1); }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .baton { left: var(--land-x); top: var(--land-y); }
+  }
+
+  /* ---- quiet sections ---- */
+  section { padding: 96px 0 0; }
+  h2 { font-size: clamp(28px, 3.4vw, 38px); line-height: 1.15; letter-spacing: -.02em; margin: 0 0 14px; font-weight: 780; }
+  .intro { color: var(--ink-2); max-width: 36em; margin: 0 0 48px; }
+
+  .steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 64px; counter-reset: step; }
+  .step { display: grid; grid-template-columns: 1fr 340px; gap: 64px; align-items: center; }
+  .step:nth-child(even) { grid-template-columns: 340px 1fr; }
+  .step:nth-child(even) .text { order: 2; }
+  .step .text { max-width: 30em; }
+  .step h3 { font-size: 26px; line-height: 1.2; margin: 0 0 10px; letter-spacing: -.01em; display: flex; align-items: baseline; gap: 14px; }
+  .step h3::before { counter-increment: step; content: counter(step); flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--relay); color: #fff; font-size: 17px; font-weight: 750; transform: translateY(-2px); }
+  .step p { color: var(--ink-2); margin: 0; }
+  .shot { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: 0 18px 40px rgba(30,20,90,.12); max-height: 420px; }
+  .shot img { display: block; width: 100%; height: auto; }
+
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 8px; }
+  .facts h3 { font-size: 19px; margin: 0 0 6px; }
+  .facts p { margin: 0; color: var(--ink-2); font-size: 17px; }
+  .cost { margin-top: 48px; background: var(--amber-bg); color: var(--amber-ink); border-left: 5px solid var(--amber); border-radius: 10px; padding: 18px 22px; max-width: 46em; }
+  .cost strong { color: inherit; }
+
+  .sites { display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 0; list-style: none; }
+  .sites li { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 16px; font-size: 16px; }
+  .fine { color: var(--ink-2); font-size: 16px; margin-top: 18px; max-width: 40em; }
+
+  footer { margin-top: 112px; border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--ink-2); font-size: 15px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: center; }
+  footer .spacer { flex: 1; }
+
+  @media (max-width: 880px) {
+    .hero .grid { grid-template-columns: 1fr; padding-bottom: 64px; }
+    .stage { height: 360px; max-width: 420px; }
+    .step, .step:nth-child(even) { grid-template-columns: 1fr; gap: 24px; }
+    .step:nth-child(even) .text { order: 0; }
+    .shot { max-width: 400px; }
+    .facts { grid-template-columns: 1fr; gap: 24px; }
+    section { padding-top: 72px; }
+  }
+  @media (max-width: 460px) {
+    .stage { height: 500px; --land-x: calc(100% - 213px); --land-y: calc(100% - 114px); }
+    .chat { width: 230px; }
+    .baton { width: 196px; font-size: 12.5px; }
+    .top nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="top">
+      <img src="logo.svg" alt="">
+      AI Relay
+      <nav><a href="../">Privacy policy</a></nav>
+    </div>
+  </div>
+  <div class="wrap grid">
+    <div>
+      <h1>Carry context from one AI chat to another.</h1>
+      <p class="lede">Worked something out in one chatbot and need it in another? AI Relay asks the chats you pick for a summary, lets you review it, and puts it into the next chat. You press every button.</p>
+      <span class="store">Chrome Web Store <small>coming soon</small></span>
+      <p class="hero-note">Free. Works in Chrome and Brave. Everything stays in your browser.</p>
+    </div>
+    <div class="stage" aria-hidden="true">
+      <div class="chat a">
+        <div class="name">Chat you worked in</div>
+        <div class="msg me">Let's take the cheaper hotel and cap activities at €300.</div>
+        <div class="msg">Updated: lodging €610, food €450, transport €260, activities €300, buffer €180.</div>
+      </div>
+      <div class="chat b">
+        <div class="name">Chat you want to continue in</div>
+        <div class="msg">Ready when you are.</div>
+        <div class="box">Message…</div>
+      </div>
+      <div class="baton"><b>Summary from your other chat</b>Lisbon, 5 days, €1,800 ceiling. Cheaper hotel, activities capped at €300.</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="wrap" aria-labelledby="how">
+    <h2 id="how">How it works</h2>
+    <p class="intro">AI Relay lives in Chrome's side panel, next to the chats you already have open. It does nothing until you ask it to.</p>
+    <ol class="steps">
+      <li class="step">
+        <div class="text">
+          <h3>Pick your chats</h3>
+          <p>Mark each open AI tab as a source to summarize, a destination to receive the result, or both. Choose a summary style, from a three-line gist to a full handoff, or write your own prompt.</p>
+        </div>
+        <figure class="shot"><img src="panel-pick.png" width="800" height="1100" alt="AI Relay side panel listing three chat tabs with Source and Destination checkboxes"></figure>
+      </li>
+      <li class="step">
+        <div class="text">
+          <h3>Collect the summaries</h3>
+          <p>AI Relay types your summary request into each source chat and reads back the reply. You can watch each chat's progress, and retry or skip one that stalls.</p>
+        </div>
+        <figure class="shot"><img src="panel-collect.png" width="800" height="844" alt="Progress list showing one chat done, one generating and one typing"></figure>
+      </li>
+      <li class="step">
+        <div class="text">
+          <h3>Review, then insert</h3>
+          <p>Edit, reorder or drop each summary. Insert fills the other chat's message box and switches you to it, so you read it and press Enter yourself. It never sends on its own.</p>
+        </div>
+        <figure class="shot"><img src="panel-review.png" width="800" height="1300" alt="Review step with two editable summaries and a list of chats to insert into"></figure>
+      </li>
+    </ol>
+  </section>
+
+  <section class="wrap" aria-labelledby="answer">
+    <div class="step">
+      <div class="text">
+        <h2 id="answer">Or read the answer right here</h2>
+        <p>If you'd rather not switch tabs, choose what the other chat should do with the context, such as suggest next steps or check for mistakes, and confirm. AI Relay sends it and shows the reply in the panel. This is the only action that sends a message for you, and it always asks first.</p>
+      </div>
+      <figure class="shot"><img src="panel-answers.png" width="800" height="664" alt="Answers section showing a reply from another chat with Copy answer and Open tab buttons"></figure>
+    </div>
+  </section>
+
+  <section class="wrap" aria-labelledby="trust">
+    <h2 id="trust">Built to stay out of your way</h2>
+    <p class="intro">There's no account, no server and no tracking. AI Relay is a tool you steer, not an agent that acts on its own.</p>
+    <div class="facts">
+      <div>
+        <h3>Nothing leaves your browser</h3>
+        <p>Summaries are kept in the panel while you work. They're saved only if you turn that on, and you can clear them any time.</p>
+      </div>
+      <div>
+        <h3>Access you can revoke</h3>
+        <p>One permission prompt covers the supported AI sites, and nothing else. Revoke any site, or pause the extension, from Settings.</p>
+      </div>
+      <div>
+        <h3>Your drafts are safe</h3>
+        <p>If a chat already has an unsent message in its box, AI Relay skips that chat instead of overwriting it.</p>
+      </div>
+    </div>
+    <p class="cost"><strong>One thing to know:</strong> collecting adds a turn to each source chat, because the summary request and its reply are ordinary messages. If you use a chatbot with limited credits or message caps, this counts toward them. It shouldn't be much.</p>
+  </section>
+
+  <section class="wrap" aria-labelledby="sites">
+    <h2 id="sites">Supported chats</h2>
+    <ul class="sites">
+      <li>ChatGPT</li><li>Claude</li><li>Gemini</li><li>Perplexity</li><li>Microsoft Copilot</li><li>Grok</li>
+      <li>DeepSeek</li><li>Le Chat (Mistral)</li><li>Kimi</li><li>Qwen</li><li>Poe</li>
+    </ul>
+    <p class="fine">Chat sites change their pages often. If one stops working, the panel's Self-test button shows which part it can't find. AI Relay is an independent project and is not affiliated with or endorsed by any of these services.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>AI Relay</span>
+    <a href="../">Privacy policy</a>
+    <span class="spacer"></span>
+    <span>No account. No server. No tracking.</span>
+  </div>
+</footer>
+
+</body>
+</html>
