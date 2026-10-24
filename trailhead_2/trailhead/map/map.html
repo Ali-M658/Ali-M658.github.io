@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trailhead map</title>
+  <link rel="stylesheet" href="../mapview.css">
+  <link rel="stylesheet" href="map.css">
+</head>
+<body>
+  <header id="bar">
+    <h1>Trailhead <span>map</span></h1>
+
+    <label class="ctl">Show
+      <select id="filter">
+        <option value="open">Trails with open tabs</option>
+        <option value="day">Last 24 hours</option>
+        <option value="all">All trails</option>
+      </select>
+    </label>
+    <input id="q" type="search" placeholder="Search pages" aria-label="Search pages">
+    <label class="ctl chk"><input id="compress" type="checkbox" checked> Compress long chains</label>
+
+    <span class="grow"></span>
+
+    <div class="legend" aria-label="Legend">
+      <span class="lg"><svg width="30" height="10" aria-hidden="true"><path d="M1 5h28" class="sample"/></svg>same tab</span>
+      <span class="lg"><svg width="30" height="10" aria-hidden="true"><path d="M1 5h28" class="sample dashed"/></svg>opened in new tab</span>
+      <span class="lg"><i class="chipdot"></i>open tab</span>
+    </div>
+
+    <button id="zoom-out" class="icon" aria-label="Zoom out" title="Zoom out (-)">&minus;</button>
+    <button id="zoom-in" class="icon" aria-label="Zoom in" title="Zoom in (+)">+</button>
+    <button id="fit" title="Fit everything (0)">Fit</button>
+  </header>
+
+  <main id="stage">
+    <svg id="svg" class="mv" role="group" aria-label="Map of your browsing trails"></svg>
+
+    <div id="empty" hidden>
+      <p><strong>Nothing to draw yet.</strong></p>
+      <p id="empty-hint">Pages are recorded from the moment Trailhead is installed. Browse a few pages, go back, click something new, and the branches will appear here.</p>
+    </div>
+
+    <aside id="tray" hidden>
+      <h2>Other open tabs</h2>
+      <div id="tray-list"></div>
+    </aside>
+
+    <p id="hint">Drag to pan &middot; scroll to pan &middot; Ctrl/&#8984;+scroll or +/&minus; to zoom &middot; click a page for details</p>
+  </main>
+
+  <footer id="detail" class="dtl" hidden></footer>
+
+  <script type="module" src="map.js"></script>
+</body>
+</html>

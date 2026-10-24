@@ -1,0 +1,72 @@
+/* Graph drawing + detail card, shared by the side panel and the full-page map.
+   Pages provide: --bg --surface --card --text --muted --line --accent --accent-soft --danger --chip-text */
+
+:root {
+  --l0: #2f6f4f; --l1: #c0562b; --l2: #3569a8; --l3: #8b4aa0;
+  --l4: #b58a14; --l5: #1b8383; --l6: #b8426c; --l7: #5f7a2c; --lg: #7b847d;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --l0: #6fc194; --l1: #ef8a5f; --l2: #7fb0ec; --l3: #c48be0;
+    --l4: #e2b84a; --l5: #5fcaca; --l6: #ee86a9; --l7: #a3c765; --lg: #8a948c;
+  }
+}
+
+.lane-0 { --lane: var(--l0); } .lane-1 { --lane: var(--l1); } .lane-2 { --lane: var(--l2); } .lane-3 { --lane: var(--l3); }
+.lane-4 { --lane: var(--l4); } .lane-5 { --lane: var(--l5); } .lane-6 { --lane: var(--l6); } .lane-7 { --lane: var(--l7); }
+.lane-g { --lane: var(--lg); }
+
+.mv { width: 100%; height: 100%; touch-action: none; cursor: grab; user-select: none; display: block; }
+.mv.dragging { cursor: grabbing; }
+
+.ghead text { fill: var(--text); font: 600 13px system-ui, sans-serif; }
+.ghead .sub { fill: var(--muted); font-weight: 400; font-size: 11.5px; }
+.ghead line { stroke: var(--line); stroke-width: 1; }
+.ghead.hasLive text:first-of-type { fill: var(--accent); }
+
+.edge { fill: none; stroke: var(--lane); stroke-width: 2; opacity: 0.9; }
+.edge.dim { opacity: 0.32; }
+.edge.newtab { stroke-dasharray: 7 5; }
+.edge.path { stroke-width: 3.5; opacity: 1; }
+.edge-mark { fill: var(--lane); font: 700 12px system-ui, sans-serif; }
+
+.node { cursor: pointer; }
+.node .card { fill: var(--card); stroke: var(--line); stroke-width: 1; }
+.node .stripe { fill: var(--lane); }
+.node text { fill: var(--text); font: 11.5px system-ui, sans-serif; pointer-events: none; }
+.node .pin-mark { fill: #d49a12; font-size: 12px; }
+.node .note-mark { fill: var(--muted); font-size: 11px; }
+.node.live .card { stroke: var(--lane); stroke-width: 2.5; }
+.node.dim { opacity: 0.62; }
+.node.dim:hover, .node.dim:focus { opacity: 1; }
+.node.sel .card { stroke: var(--text); stroke-width: 2.5; }
+.node.hit .card { fill: var(--accent-soft); }
+.node:focus { outline: none; }
+.node:focus-visible .card { stroke: var(--accent); stroke-width: 3; }
+.node.run .card { fill: var(--surface); stroke-dasharray: 4 3; }
+.node.run text { fill: var(--muted); }
+
+.strip { cursor: pointer; }
+.strip rect, .strip path { fill: var(--lane); }
+.strip text { fill: var(--chip-text); font: 600 10.5px system-ui, sans-serif; pointer-events: none; }
+.strip.sleeping rect, .strip.sleeping path { opacity: 0.6; }
+.strip:focus { outline: none; }
+.strip:focus-visible rect, .strip:focus-visible path { stroke: var(--text); stroke-width: 2; }
+
+/* zoomed far out: keep shapes and colours, drop the small print */
+.lod .node text, .lod .node image, .lod .strip text, .lod .edge-mark, .lod .ghead .sub { display: none; }
+
+/* ---- selected-page card ---- */
+.dtl { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; background: var(--surface); border-top: 1px solid var(--line); flex-wrap: wrap; }
+.dtl .info { flex: 1 1 220px; min-width: 0; }
+.dtl .d-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dtl .d-url, .dtl .d-meta { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dtl .d-note { width: 100%; margin-top: 6px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--text); font: inherit; }
+.dtl .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.dtl button { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; cursor: pointer; color: var(--text); font: inherit; }
+.dtl button:hover { border-color: var(--muted); }
+.dtl button.primary { background: var(--accent); border-color: var(--accent); color: var(--chip-text); }
+.dtl button.danger { color: var(--danger); border-color: var(--danger); background: none; }
+
+/* Author display rules (flex, grid) would otherwise override the hidden attribute. */
+[hidden] { display: none !important; }

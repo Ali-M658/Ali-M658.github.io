@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trailhead</title>
+  <link rel="stylesheet" href="../mapview.css">
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <header>
+    <h1>Trailhead</h1>
+    <div class="seg" role="tablist" aria-label="View">
+      <button role="tab" class="on" data-view="trail">Trail</button>
+      <button role="tab" data-view="saved">Saved</button>
+      <button role="tab" data-view="all">All</button>
+    </div>
+    <button id="expand" class="icon" aria-label="Open the full-page map" title="Open the full-page map">&#10530;</button>
+    <button id="gear" class="icon" aria-label="Settings" title="Settings">&#9881;</button>
+  </header>
+
+  <div id="paused" class="banner" hidden>Recording is paused. New pages are not being added.</div>
+
+  <section id="left" hidden aria-label="Left behind"></section>
+
+  <div id="searchbar"><input id="q" type="search" placeholder="Search every page on your trails" aria-label="Search trails"></div>
+
+  <div id="subbar" hidden>
+    <div class="seg small" role="tablist" aria-label="Trail display">
+      <button role="tab" class="on" data-mode="list">List</button>
+      <button role="tab" data-mode="graph">Graph</button>
+    </div>
+    <select id="scope" hidden aria-label="Graph scope">
+      <option value="trail">This trail</option>
+      <option value="browser">Whole browser</option>
+    </select>
+    <span class="grow"></span>
+    <button id="park" hidden title="Close this trail's open tabs and save them so you can reopen them later">Park trail</button>
+  </div>
+
+  <div id="statsbar" class="statsbar" hidden></div>
+
+  <main id="list" aria-live="polite">
+    <div class="skeleton" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <div id="graphwrap" hidden>
+    <svg id="psvg" class="mv" role="group" aria-label="Graph of your browsing trails"></svg>
+  </div>
+  <div id="pdetail" class="dtl" hidden></div>
+
+  <section id="settings" hidden>
+    <h2>Settings</h2>
+    <label class="field">Toolbar icon opens
+      <select id="icon-opens">
+        <option value="panel">This side panel</option>
+        <option value="map">Full-page map</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="paused-box"> Pause recording</label>
+    <label class="check"><input type="checkbox" id="scroll-box"> Remember scroll position
+      <span class="hint">Asks for access to all sites so a small script can note how far down each page you are. It never reads page text. Off by default.</span>
+    </label>
+    <label class="field">Keep trails for
+      <span><input type="number" id="days" min="1" max="365" step="1"> days</span>
+    </label>
+    <label class="field stack">Never record these sites (one per line)
+      <textarea id="excluded" rows="4" spellcheck="false" placeholder="mybank.com&#10;mail.example.com"></textarea>
+    </label>
+    <p id="stats" class="hint"></p>
+    <p class="hint"><strong>Shortcuts:</strong> Alt+Shift+B reopens the last page you went back from. Alt+Shift+M opens the full map. Change them at chrome://extensions/shortcuts.</p>
+    <p class="hint">Incognito windows are never recorded. Everything stays on this device. Pinned pages, notes and parked trails are never pruned.</p>
+    <button id="forget" class="danger">Forget everything</button>
+    <button id="close-settings">Done</button>
+  </section>
+
+  <script type="module" src="panel.js"></script>
+</body>
+</html>
