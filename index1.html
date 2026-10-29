@@ -22,34 +22,37 @@
 <body>
 <main>
   <h1>AI Relay – Privacy Policy</h1>
-  <p class="meta">Last updated: October 18, 2026</p>
-
+  <p class="meta">Last updated: October 29, 2026</p>
+ 
   <div class="summary">
-    <p><strong>In short:</strong> AI Relay runs entirely in your browser. It has no server, no account, no analytics and no tracking. The developer never receives your conversations, summaries or any other data.</p>
+    <p><strong>In short:</strong> AI Relay runs in your browser. It has no account and does not track what you do. The developer never receives your conversations, summaries, tabs or settings. The only thing it ever sends is an anonymous count when it is installed and when it updates to a new version.</p>
   </div>
-
+ 
   <h2>What AI Relay does</h2>
   <p>AI Relay is a browser extension that helps you carry context between AI chat tabs you already have open. You choose which tabs to summarize and which tabs should receive the result. It does nothing until you press a button.</p>
-
+ 
   <h2>What it accesses, and when</h2>
   <ul>
-    <li><strong>Chat text from tabs you pick.</strong> When you press <em>Collect</em>, AI Relay types a summary request into each source chat you selected and reads the reply back. This is the only chat content it reads. It does not read tabs you did not select, and it does not run in the background on its own.</li>
+    <li><strong>Chat text from tabs you pick.</strong> When you press <em>Collect</em>, AI Relay either types a summary request into each source chat you selected and reads the reply back, or, if you choose "Copy the conversation as-is", reads the messages already shown on those pages (yours and the AI's) without typing anything. It does not read tabs you did not select.</li>
+    <li><strong>Conversation size.</strong> While the panel is open, AI Relay reads the conversations in open tabs on the supported AI sites you have allowed, only to show a rough size estimate next to each tab. That text is counted and discarded; it is not stored or sent anywhere.</li>
     <li><strong>Tab titles and addresses</strong> of open tabs on supported AI sites, to list them in the panel. Other tabs are ignored.</li>
     <li><strong>Site access is optional.</strong> The browser asks once for permission to "read and change data" on the specific supported AI chat sites listed in the extension's Settings. It is never requested for all websites, and you can revoke it at any time in Settings or in your browser's extension settings.</li>
   </ul>
-
+ 
   <h2>What is stored</h2>
   <ul>
     <li><strong>Settings</strong> (such as your prompt choice and whether you accepted the first-use notice) are stored locally in your browser using <code>chrome.storage.local</code>.</li>
-    <li><strong>Collected summaries</strong> are kept in memory while you work. They are saved to your browser only if you turn on "Save collected summaries locally" in Settings, and you can delete them at any time with "Clear saved summaries". Uninstalling the extension removes all of its stored data.</li>
+    <li><strong>Collected summaries and copied conversations</strong> are kept in memory while you work. Summaries are saved to your browser only if you turn on "Save collected summaries locally" in Settings, and you can delete them at any time with "Clear saved summaries".</li>
+    <li><strong>Recent handoffs.</strong> The last 5 things you inserted or sent are kept in the browser's session memory (<code>chrome.storage.session</code>) so you can re-insert them. They are deleted when you close the browser, and you can turn this off or clear it in Settings.</li>
+    <li>Uninstalling the extension removes all of its stored data.</li>
   </ul>
-
+ 
   <h2>What is shared, and with whom</h2>
   <ul>
-    <li><strong>With the developer: nothing.</strong> There are no AI Relay servers. No data is collected, transmitted to, or stored by the developer. There is no analytics, telemetry, advertising or crash reporting.</li>
-    <li><strong>With the AI services you use.</strong> When you press Insert, or "Insert, send and show the answer here", the text you reviewed is placed into the destination chat you chose. That text is then handled by that AI service under its own terms and privacy policy. Plain Insert never sends the message; the send option only submits after you confirm. Summary requests in source chats are likewise ordinary messages in those chats.</li>
+    <li><strong>With the developer: an install and update count, nothing else.</strong> When AI Relay is first installed, and each time it updates to a new version, it sends one message to the developer's counter saying "install" or "update", the app name and the version number (for example 0.9.2). It contains no identifier, no settings, no browsing or chat data, and nothing is sent in between (not during use, not on browser restarts). If it can't be sent at that moment (for example you're offline), AI Relay keeps just that event and version number in your browser and tries again the next time the browser starts, until it gets through once. Like any request on the internet, it reaches the counter from your IP address; the counter keeps only running totals (per day and per version) and does not store IP addresses. The counter runs on Cloudflare Workers. There is no other analytics, telemetry, advertising or crash reporting.</li>
+    <li><strong>With the AI services you use.</strong> When you press Insert, "Open a new chat and insert", or "Insert, send and show the answer here", the text you reviewed is placed into the destination chat you chose. Before that, AI Relay can detect and redact things that look like API keys, tokens and passwords, at your request. That text is then handled by that AI service under its own terms and privacy policy. Plain Insert never sends the message; the send option only submits after you confirm. Summary requests in source chats are likewise ordinary messages in those chats.</li>
   </ul>
-
+ 
   <h2>What it does not do</h2>
   <ul>
     <li>It does not sell or transfer user data to third parties.</li>
@@ -57,19 +60,19 @@
     <li>It does not run remotely hosted code. All code ships inside the extension package.</li>
     <li>It does not evaluate creditworthiness, set lending terms, or use data for advertising.</li>
   </ul>
-
+ 
   <h2>Credits and limits</h2>
-  <p>Collecting adds one turn (your summary request and the AI's reply) to each source chat, and sending adds a turn to each destination chat. If you use services with limited credits or message caps, this counts toward them. AI Relay cannot remove those turns afterwards.</p>
-
+  <p>Asking for a summary adds one turn (your summary request and the AI's reply) to each source chat; copying the conversation adds none. Sending adds a turn to each destination chat. If you use services with limited credits or message caps, this counts toward them. AI Relay cannot remove those turns afterwards.</p>
+ 
   <h2>Children</h2>
   <p>AI Relay is a general-purpose productivity tool and is not directed at children. It collects no personal information from anyone.</p>
-
+ 
   <h2>Changes to this policy</h2>
   <p>If this policy changes, the new version will be posted on this page with an updated date. Material changes will also be noted in the extension's store listing.</p>
-
+ 
   <h2>Contact</h2>
-  <p>Questions about this policy: <a href="mailto:slowninjo@gmail.com">slowninjo@gmail.com</a></p>
-
+  <p>Questions about this policy: <a href="mailto:YOUR-EMAIL@example.com">YOUR-EMAIL@example.com</a></p>
+ 
   <p class="meta" style="margin-top:36px">AI Relay is an independent project and is not affiliated with or endorsed by any of the AI services it works with.</p>
 </main>
 </body>
